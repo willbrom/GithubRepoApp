@@ -9,9 +9,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
-/**
- * Created by TOSHIBA on 8/20/2017.
- */
 
 public class NetworkUtilities {
 
@@ -27,8 +24,7 @@ public class NetworkUtilities {
                 .build();
 
         try {
-            URL url = new URL(uri.toString());
-            return url;
+            return new URL(uri.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;

@@ -16,16 +16,18 @@ import com.example.toshiba.udacitygithubrepoapp.utilities.NetworkUtilities;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.zip.Inflater;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView displayUrlTextView;
-    TextView searchResultTextView;
-    TextView errorMessageTextView;
-    EditText searchEditText;
-    ProgressBar loaderProgressBar;
+    private TextView displayUrlTextView;
+    private TextView searchResultTextView;
+    private TextView errorMessageTextView;
+    private EditText searchEditText;
+    private ProgressBar loaderProgressBar;
+
+    private static final String KEY_URL = "url";
+    private static final String KEY_RESULT = "result";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +41,30 @@ public class MainActivity extends AppCompatActivity {
         loaderProgressBar = (ProgressBar) findViewById(R.id.pb_loader);
 
 
+        if (savedInstanceState != null) {
+            String displayUrl = savedInstanceState.getString(KEY_URL);
+            String displayResult = savedInstanceState.getString(KEY_RESULT);
+
+            displayUrlTextView.setText(displayUrl);
+            searchResultTextView.setText(displayResult);
+        }
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        String displayUrl = displayUrlTextView.getText().toString();
+        String displayResult = searchResultTextView.getText().toString();
+
+        outState.putString(KEY_URL, displayUrl);
+        outState.putString(KEY_RESULT, displayResult);
     }
 
     private void loadGitHubData() {
         displaySearchResults();
         String searchTerm = searchEditText.getText().toString();
-        if (searchTerm != null && !searchTerm.equals("")) {
+        if (!searchTerm.equals("")) {
             URL url = NetworkUtilities.getUrl(searchTerm);
             displayUrlTextView.setText(url.toString());
             new GitHubTask().execute(url);
@@ -64,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public class GitHubTask extends AsyncTask<URL, Void, String> {
+    private class GitHubTask extends AsyncTask<URL, Void, String> {
 
         @Override
         protected void onPreExecute() {
@@ -78,8 +98,7 @@ public class MainActivity extends AppCompatActivity {
             URL url = urls[0];
 
             try {
-                String searchResult = NetworkUtilities.getResultFromHttp(url);
-                return searchResult;
+                return NetworkUtilities.getResultFromHttp(url);
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -90,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             searchResultTextView.setVisibility(View.VISIBLE);
             loaderProgressBar.setVisibility(View.INVISIBLE);
-            
+
             if (s != null && !s.equals("")) {
                 searchResultTextView.setText(s);
             } else {
